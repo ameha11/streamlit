@@ -21,7 +21,7 @@ st.markdown(
     "<style>div.block-container{padding-top:1rem;}</style>", unsafe_allow_html=True
 )
 
-df = pd.read_excel("C:\Survey AGP II\Data\Head_and_Spouse.xls")
+df = pd.read_excel("Head_and_Spouse.xls")
 
 col1, col2 = st.columns((2))
 df["ID15"] = pd.to_datetime(df["ID15"])
