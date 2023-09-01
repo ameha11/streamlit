@@ -21,7 +21,7 @@ st.markdown(
     "<style>div.block-container{padding-top:1rem;}</style>", unsafe_allow_html=True
 )
 
-df = pd.read_excel("Head_and_Spouse.xls")
+df = pd.read_excel("C:\Survey AGP II\Data\Head_and_Spouse.xls")
 
 col1, col2 = st.columns((2))
 df["ID15"] = pd.to_datetime(df["ID15"])
@@ -42,21 +42,21 @@ df = df[(df["ID15"] >= date1) & (df["ID15"] <= date2)].copy()
 st.sidebar.header("Filter by Location: ")
 
 # Region
-region = st.sidebar.multiselect("Select Region", df["Region"].unique())
+region = st.sidebar.multiselect("Region", df["Region"].unique())
 if not region:
     df2 = df.copy()
 else:
     df2 = df[df["Region"].isin(region)]
 
 # Woreda
-woreda = st.sidebar.multiselect("Select Woreda", df2["Woreda"].unique())
+woreda = st.sidebar.multiselect("Woreda", df2["Woreda"].unique())
 if not woreda:
     df3 = df2.copy()
 else:
     df3 = df2[df2["Woreda"].isin(woreda)]
 
 # Kebele
-kebele = st.sidebar.multiselect("Select kebele", df3["Kebele"].unique())
+kebele = st.sidebar.multiselect("kebele", df3["Kebele"].unique())
 
 # Filter by location
 
@@ -103,7 +103,7 @@ category_df = filtered_df.groupby(by=["Woreda"], as_index=False)["COLLECTED"].su
 category_df["EXPECTED"] = category_df["Woreda"].map(woreda_exp_dic)
 
 
-print(category_df)
+# print(category_df)
 with col1:
     st.subheader("Interviews by woreda")
     plost.bar_chart(
