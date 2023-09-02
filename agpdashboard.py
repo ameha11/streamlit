@@ -23,22 +23,37 @@ st.markdown(
 
 df = pd.read_excel("Head_and_Spouse.xls")
 
+# region count
+region_count = df.groupby(["Region"]).size().reset_index(name="count")
+regDict = dict(region_count.values)
+oro_count = regDict.get("Oromiya", 0)
+snnp_count = regDict.get("SNNP", 0)
+
 col1, col2 = st.columns((2))
+col1.metric("OROMIYA:", oro_count)
+col2.metric("SNNP:", snnp_count)
+
+
+# ---------------------------------------------
 df["ID15"] = pd.to_datetime(df["ID15"])
 
 # Getting the min and max date
-startDate = pd.to_datetime(df["ID15"]).min()
-endDate = pd.to_datetime(df["ID15"]).max()
+# startDate = pd.to_datetime(df["ID15"]).min()
+# endDate = pd.to_datetime(df["ID15"]).max()
 
-with col1:
-    date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-with col2:
-    date2 = pd.to_datetime(st.date_input("End Date", endDate))
+# with col1:
+# date1 = pd.to_datetime(st.date_input("Start Date", startDate))
 
-df = df[(df["ID15"] >= date1) & (df["ID15"] <= date2)].copy()
+# with col2:
+# date2 = pd.to_datetime(st.date_input("End Date", endDate))
 
+# df = df[(df["ID15"] >= date1) & (df["ID15"] <= date2)].copy()
+
+
+# -----------------------------------------------------------------
 # Location selection sidebar
+
 st.sidebar.header("Filter by Location: ")
 
 # Region
@@ -111,43 +126,81 @@ with col1:
         bar="Woreda",
         value=["COLLECTED", "EXPECTED"],
         group=True,
-        width=75,
+        width=60,
     )
 
 
 with col2:
     st.subheader("Interview by sample type")
     fig = px.pie(filtered_df, values="COLLECTED", names="ID0", hole=0.5)
-    fig.update_traces(text=filtered_df["Region"], textposition="outside")
+    fig.update_traces(text=filtered_df["ID0"], textposition="outside")
+    st.plotly_chart(fig, use_container_width=False)
+
+# -----------------------------------------------------------------------------
+
+experiment_df = filtered_df.groupby(by=["RANDOME_X"], as_index=False)["COLLECTED"].sum()
+
+col3, col4 = st.columns((2))
+with col3:
+    print(experiment_df)
+    st.subheader("Experiment Observations (RANDOME_X)")
+    fig = px.pie(
+        experiment_df, values="COLLECTED", names="RANDOME_X", template="plotly_dark"
+    )
+    fig.update_traces(text=experiment_df["RANDOME_X"], textposition="inside")
     st.plotly_chart(fig, use_container_width=True)
 
+# video sample
+video_sample = {
+    "Oromiya": 426,
+    "SNNP": 409,
+}
+Video_filtered = filtered_df[filtered_df["SE1"] == "Yes"]
+
+reg_video_sample = Video_filtered.groupby(by=["Region"], as_index=False)[
+    "COLLECTED"
+].sum()
+
+reg_video_sample["EXPECTED"] = reg_video_sample["Region"].map(video_sample)
+
+with col4:
+    st.subheader("Video Sample Collected by Region")
+    plost.bar_chart(
+        data=reg_video_sample,
+        bar="Region",
+        value=["COLLECTED", "EXPECTED"],
+        group=True,
+        width=60,
+    )
+
+# -----------------------------------------------------------
 filtered_df["Day"] = filtered_df["ID15"].dt.to_period("D")
 linechart = pd.DataFrame(
     filtered_df.groupby(filtered_df["Day"].dt.strftime("%D : %b"))["COLLECTED"].sum()
 ).reset_index()
 
-col3, col4 = st.columns((2))
-with col3:
-    st.subheader("Daily Progress")
-    fig2 = px.line(
-        linechart,
-        x="Day",
-        y="COLLECTED",
-        # labels={"Sales": "Amount"},
-        # height=500,
-        # width=500,
-        template="gridon",
-    )
-    st.plotly_chart(fig2, use_container_width=True)
+# col5, col6 = st.columns((2))
+# with col5:
+payout_df = filtered_df.groupby(by=["Supervisor"], as_index=False)["Payout"].mean()
+st.subheader("Average Payout by Supervisor ($)")
+fig = px.bar(
+    payout_df,
+    x="Supervisor",
+    y="Payout",
+    text=["{:,.0f}".format(x) for x in payout_df["Payout"]],
+    template="seaborn",
+)
+st.plotly_chart(fig, use_container_width=True)
 
-with col4:
-    payout_df = filtered_df.groupby(by=["Supervisor"], as_index=False)["Payout"].mean()
-    st.subheader("Average Payout by Team")
-    fig = px.bar(
-        payout_df,
-        x="Supervisor",
-        y="Payout",
-        text=["{:,.0f}".format(x) for x in payout_df["Payout"]],
-        template="seaborn",
-    )
-    st.plotly_chart(fig, use_container_width=True)
+# with col6:
+st.subheader("Data Collection Progress")
+fig2 = px.line(
+    linechart,
+    x="Day",
+    y="COLLECTED",
+    # labels={"Sales": "Amount"},
+    # height=500,
+    # width=500,
+    template="gridon",
+)
+st.plotly_chart(fig2, use_container_width=True)
