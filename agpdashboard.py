@@ -28,11 +28,12 @@ region_count = df.groupby(["Region"]).size().reset_index(name="count")
 regDict = dict(region_count.values)
 oro_count = regDict.get("Oromiya", 0)
 snnp_count = regDict.get("SNNP", 0)
+total = oro_count + snnp_count
 
-col1, col2 = st.columns((2))
-col1.metric("OROMIYA:", oro_count)
-col2.metric("SNNP:", snnp_count)
-
+col1, col2, col3 = st.columns((3))
+col1.metric("Oromiya:", oro_count)
+col2.metric("Snnp:", snnp_count)
+col3.metric("TOTAL:", total)
 
 # ---------------------------------------------
 df["ID15"] = pd.to_datetime(df["ID15"])
@@ -53,7 +54,7 @@ df["ID15"] = pd.to_datetime(df["ID15"])
 
 # -----------------------------------------------------------------
 # Location selection sidebar
-
+st.sidebar.image("frontieri.png")
 st.sidebar.header("Filter by Location: ")
 
 # Region
