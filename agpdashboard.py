@@ -31,8 +31,8 @@ snnp_count = regDict.get("SNNP", 0)
 total = oro_count + snnp_count
 
 col1, col2, col3 = st.columns((3))
-col1.metric("Oromiya:", oro_count)
-col2.metric("Snnp:", snnp_count)
+col1.metric("OROMIYA:", oro_count)
+col2.metric("SNNP:", snnp_count)
 col3.metric("TOTAL:", total)
 
 # ---------------------------------------------
@@ -120,6 +120,7 @@ category_df["EXPECTED"] = category_df["Woreda"].map(woreda_exp_dic)
 
 
 # print(category_df)
+col1, col2 = st.columns((2))
 with col1:
     st.subheader("Interviews by woreda")
     plost.bar_chart(
